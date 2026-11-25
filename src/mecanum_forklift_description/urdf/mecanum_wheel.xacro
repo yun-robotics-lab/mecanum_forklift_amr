@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Wheel link frame: origin at wheel centre, axle along +Y.
+       The STL is in mm with the axle along its Z axis and its centre at
+       (38.58, 40.59, 72.67) mm, so the visual is rotated -90 deg about X and
+       shifted by -R*centre to put the wheel centre on the link origin. -->
+  <xacro:property name="wheel_radius" value="0.039"/>
+  <xacro:property name="wheel_width" value="0.047"/>
+  <xacro:property name="wheel_mass" value="0.3"/>
+
+  <!-- flip=-1 turns the visual 180 deg about Z (left wheels); joint/axis/collision unchanged. -->
+  <xacro:macro name="mecanum_wheel" params="name x y z flip:=1">
+    <link name="${name}_wheel_link">
+      <!-- Split from mecanum_wheel.stl (kept as original): tan hub, red rollers, grey axle cap. -->
+      <visual>
+        <origin xyz="${-0.03858*flip} ${-0.07267*flip} 0.04059" rpy="${-pi/2} 0 ${pi*(1-flip)/2}"/>
+        <geometry>
+          <mesh filename="package://mecanum_forklift_description/meshes/mecanum_wheel_hub.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="wheel_hub_tan"/>
+      </visual>
+      <visual>
+        <origin xyz="${-0.03858*flip} ${-0.07267*flip} 0.04059" rpy="${-pi/2} 0 ${pi*(1-flip)/2}"/>
+        <geometry>
+          <mesh filename="package://mecanum_forklift_description/meshes/mecanum_wheel_roller.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="wheel_roller_red"/>
+      </visual>
+      <visual>
+        <origin xyz="${-0.03858*flip} ${-0.07267*flip} 0.04059" rpy="${-pi/2} 0 ${pi*(1-flip)/2}"/>
+        <geometry>
+          <mesh filename="package://mecanum_forklift_description/meshes/mecanum_wheel_axle.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="wheel_axle_grey"/>
+      </visual>
+      <collision>
+        <!-- Must stay a sphere (like the Gazebo mecanum example): with a mesh collision the
+             wheel friction (mu1/mu2/fdir1 in the .gazebo.xacro) has no effect and the robot
+             cannot strafe. -->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <sphere radius="${wheel_radius}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_y_inertia m="${wheel_mass}" r="${wheel_radius}" l="${wheel_width}">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </xacro:cylinder_y_inertia>
+    </link>
+
+    <joint name="${name}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}_wheel_link"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <dynamics damping="0.01" friction="0.0"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,24 @@
+# Geometry must match mecanum_forklift_description (wheel_radius, 2*wheel_y, 2*wheel_x).
+/**/cmd_vel_gate:
+  ros__parameters:
+    input_topic: cmd_vel_mux     # twist_mux output (teleop > navigation)
+    output_topic: cmd_vel
+    timeout: 0.3          # s; wall clock. No command for this long -> zero velocity
+    publish_rate: 20.0
+    # Sim placeholders. Confirm against the real hardware limits before any hardware use.
+    max_vx: 0.6
+    max_vy: 0.6
+    max_wz: 2.0
+
+/**/wheel_odometry:
+  ros__parameters:
+    wheel_radius: 0.039
+    wheel_separation: 0.261
+    wheelbase: 0.22
+    joint_names: [fl_wheel_joint, fr_wheel_joint, rl_wheel_joint, rr_wheel_joint]
+    odom_frame: odom
+    base_frame: base_footprint
+    publish_tf: true      # single owner of odom -> base_footprint
+    publish_rate: 50.0
+    pose_variance: 0.01
+    twist_variance: 0.01

@@ -1,0 +1,20 @@
+# Parameters of the web layer. Ports: REST 8000, rosbridge 9090, video 8080 (launch arguments).
+# Everything binds to 127.0.0.1 unless the launch argument `address` is changed: do that only on a
+# trusted network (rosbridge 2.0.4 has no authentication) and set cors_origins.
+/**/web_backend:
+  ros__parameters:
+    use_sim_time: true
+    dock_database: ''                  # set by the launch file
+    video_url: ''                      # set by the launch file
+    rest_address: 127.0.0.1
+    rest_port: 8000
+    token_file: ~/.config/mecanum_forklift/web_token    # created with mode 0600 on first start
+    cors_origins: ['']                 # e.g. ['http://localhost:3000']; empty = no CORS
+    map_bounds: [-3.04, -2.54, 3.01, 2.56]   # x_min y_min x_max y_max of the nav map (m)
+    max_body: 4096                     # bytes
+    rate_capacity: 5                   # POST /missions and cancel: burst
+    rate_per_minute: 10                # ... and refill; /estop is never limited
+/**/estop_node:
+  ros__parameters:
+    use_sim_time: true
+    velocity_topic: cmd_vel_estop

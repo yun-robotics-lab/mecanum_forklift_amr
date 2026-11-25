@@ -1,0 +1,43 @@
+# colcon outputs (workspace root only)
+/build/
+/install/
+/log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# C++ build artefacts
+*.o
+*.so
+compile_commands.json
+
+# ROS 2 / Gazebo runtime output
+*.log
+*.db3
+*.mcap
+rosbag2_*/
+frames_*.gv
+frames_*.pdf
+
+# Editors and OS (.vscode holds machine-specific paths)
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Secrets and local settings
+.env
+.env.*
+*.pem
+*.key
+web_token
+.claude/settings.local.json
+CLAUDE.local.md

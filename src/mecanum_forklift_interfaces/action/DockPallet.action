@@ -1,0 +1,29 @@
+# Dock at a pallet / station: set the marker, run opennav_docking, set the fork height, back out.
+# The dock database entry decides the operation: `pick` (lift, loaded footprint) or `drop` (needs a
+# carried pallet, lowers the fork, restores the bare footprint).
+# The robot is commanded only through cmd_vel_dock (twist_mux) and the cmd_vel_gate limits.
+# Sequence: marker -> opennav_docking approach (ends ~0.15 m short) -> holonomic final alignment
+# (10 mm / 10 mm / 2 deg) -> lift -> optional back-out.
+# Cancel: the active sub-action is cancelled, the robot stops (zero velocity) and the result is
+# error_code "CANCELED". The whole sequence is limited by the node parameter `total_timeout`.
+
+# Goal
+string dock_id                # key in the dock database (docks: yaml)
+bool navigate_to_staging      # true: navigate (Nav2, unloaded footprint) to the staging pose first;
+                              # false: the robot must already be within the staging tolerance
+bool undock_after             # true: reverse out to the staging pose after the lift (pick)
+
+---
+# Result
+# error_code: "" (success) | DOCK_NOT_IN_DB | MARKER_SET_FAILED | STAGING_FAILED |
+#   MARKER_NOT_FOUND | CONTROL_FAILED | DOCK_FAILED | ALIGN_FAILED | LIFT_FAILED | MAP_UPDATE_FAILED | NOT_CARRYING | WRONG_PALLET | UNDOCK_FAILED |
+#   TIMEOUT | CANCELED | SERVER_UNAVAILABLE
+bool success
+string error_code
+string message
+
+---
+# Feedback
+# state: SET_MARKER | STAGING | DOCKING | ALIGNING | LIFTING | LOWERING | UNDOCKING | DONE
+string state
+float32 progress              # 0..100

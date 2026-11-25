@@ -1,0 +1,13 @@
+# Moving cylinders of worlds/warehouse_v2.sdf. Each goes back and forth around the pose of its model
+# in the world file (path middle). amplitude = distance from the middle to each end (m), speed in m/s.
+/**/obstacle_mover:
+  ros__parameters:
+    use_sim_time: true
+    rate: 20.0
+    obstacles: ['obstacle_x', 'obstacle_y']
+    obstacle_x:
+      amplitude: 1.5      # world x -2.2 .. 0.8 at y -1.3
+      speed: 0.2
+    obstacle_y:
+      amplitude: 1.2      # world y -1.2 .. 1.2 at x 2.2
+      speed: 0.2

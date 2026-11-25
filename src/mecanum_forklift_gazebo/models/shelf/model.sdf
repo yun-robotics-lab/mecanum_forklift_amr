@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <model name="shelf">
+    <static>true</static>
+    <link name="link">
+      <collision name="post0_col">
+        <pose>-0.27 -0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+      </collision>
+      <visual name="post0_vis">
+        <pose>-0.27 -0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+        <material>
+          <ambient>0.15 0.3 0.65 1</ambient>
+          <diffuse>0.15 0.3 0.65 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="post1_col">
+        <pose>-0.27 0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+      </collision>
+      <visual name="post1_vis">
+        <pose>-0.27 0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+        <material>
+          <ambient>0.15 0.3 0.65 1</ambient>
+          <diffuse>0.15 0.3 0.65 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="post2_col">
+        <pose>0.27 -0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+      </collision>
+      <visual name="post2_vis">
+        <pose>0.27 -0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+        <material>
+          <ambient>0.15 0.3 0.65 1</ambient>
+          <diffuse>0.15 0.3 0.65 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="post3_col">
+        <pose>0.27 0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+      </collision>
+      <visual name="post3_vis">
+        <pose>0.27 0.14 0.16 0 0 0</pose>
+        <geometry><box><size>0.025 0.025 0.32</size></box></geometry>
+        <material>
+          <ambient>0.15 0.3 0.65 1</ambient>
+          <diffuse>0.15 0.3 0.65 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="level0_col">
+        <pose>0 0 0.06 0 0 0</pose>
+        <geometry><box><size>0.58 0.32 0.012</size></box></geometry>
+        <surface><friction><ode><mu>0.9</mu><mu2>0.9</mu2></ode></friction></surface>
+      </collision>
+      <visual name="level0_vis">
+        <pose>0 0 0.06 0 0 0</pose>
+        <geometry><box><size>0.58 0.32 0.012</size></box></geometry>
+        <material>
+          <ambient>0.85 0.5 0.1 1</ambient>
+          <diffuse>0.85 0.5 0.1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="level1_col">
+        <pose>0 0 0.19 0 0 0</pose>
+        <geometry><box><size>0.58 0.32 0.012</size></box></geometry>
+        <surface><friction><ode><mu>0.9</mu><mu2>0.9</mu2></ode></friction></surface>
+      </collision>
+      <visual name="level1_vis">
+        <pose>0 0 0.19 0 0 0</pose>
+        <geometry><box><size>0.58 0.32 0.012</size></box></geometry>
+        <material>
+          <ambient>0.85 0.5 0.1 1</ambient>
+          <diffuse>0.85 0.5 0.1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="brace_vis">
+        <pose>0 0.15 0.25 0 0 0</pose>
+        <geometry><box><size>0.55 0.01 0.01</size></box></geometry>
+        <material>
+          <ambient>0.15 0.3 0.65 1</ambient>
+          <diffuse>0.15 0.3 0.65 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

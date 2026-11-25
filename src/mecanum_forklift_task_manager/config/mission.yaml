@@ -1,0 +1,11 @@
+/**/mission_manager:
+  ros__parameters:
+    use_sim_time: true
+    dock_database: ''            # set by the launch file (docking package dock_database.yaml)
+    # timeouts in node-clock seconds (sim time in the simulation)
+    nav_timeout: 150.0           # RETURN navigation
+    dock_timeout: 180.0          # one DockPallet (staging navigation + dock + lift/lower + back-out)
+    mission_timeout: 600.0       # whole mission
+    max_retries: 1               # extra attempts per step for STAGING_FAILED / MARKER_NOT_FOUND / NAV_FAILED
+    odom_topic: odom
+    status_rate: 2.0

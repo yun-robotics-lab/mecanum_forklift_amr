@@ -1,0 +1,12 @@
+# Marker detection. marker_size = side length of the black square (m), sim placeholder.
+/**/aruco_node:
+  ros__parameters:
+    image_topic: camera/image_raw
+    camera_info_topic: camera/camera_info
+    dictionary: DICT_4X4_50
+    marker_size: 0.10            # m; must match the sim marker model
+    target_marker_id: -1         # -1 = none; set live: ros2 param set /aruco_node target_marker_id 0
+    corner_expand_px: 0.75       # SIM-ONLY calibration: rendered marker edges blur ~1 px inward; 0.0 on hardware
+    target_frame: odom           # stable frame for the published poses
+    max_tf_age: 1.0              # s (sim time); detections whose TF is later than this are dropped
+    publish_debug_image: false   # the 640x480 debug image costs ~15 MB/s and CPU; set true to inspect

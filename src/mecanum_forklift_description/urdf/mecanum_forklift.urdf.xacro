@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<robot name="mecanum_forklift" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="inertial_macros.xacro"/>
+
+  <xacro:include filename="material.xacro"/>
+  <xacro:include filename="mecanum_wheel.xacro"/>
+
+  <!-- ===== Dimensions (metres) ===== -->
+  <!-- base.stl: 407 x 254 x 204 mm, origin at bottom centre -->
+  <xacro:property name="base_length" value="0.407"/>
+  <xacro:property name="base_width" value="0.254"/>
+  <xacro:property name="base_height" value="0.204"/>
+  <xacro:property name="base_mass" value="5.0"/>
+  <xacro:property name="base_front" value="0.205"/> <!-- front face x after the 180 deg rotation -->
+  <xacro:property name="ground_clearance" value="0.02"/>
+
+  <!-- wheel centre height above base bottom (wheel radius - clearance) -->
+  <xacro:property name="wheel_z" value="${wheel_radius - ground_clearance}"/>
+  <xacro:property name="wheel_x" value="0.11"/>   <!-- front/rear axle offset from centre -->
+  <xacro:property name="wheel_y" value="${base_width/2 + wheel_width/2 - 0.02}"/>
+
+  <!-- fork.stl: 200 x 178 x 88 mm; tines point to -Y in the STL, so yaw +90 deg -->
+  <xacro:property name="fork_mass" value="0.5"/>
+  <xacro:property name="fork_x" value="${base_front + 0.013}"/> <!-- rear lip touches base front -->
+  <xacro:property name="fork_lift_max" value="0.12"/>
+  <xacro:property name="fork_ground_gap" value="0.01"/>
+
+  <!-- ===== Footprint ===== -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${ground_clearance}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Base ===== -->
+  <!-- base STL is rotated 180 deg about Z so its front faces +X -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+      <geometry>
+        <mesh filename="package://mecanum_forklift_description/meshes/mecanum_base.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="ironman_red"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0015 0 ${base_height/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${base_length} ${base_width} ${base_height}"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}">
+      <origin xyz="0.0015 0 ${base_height/2}" rpy="0 0 0"/>
+    </xacro:box_inertia>
+  </link>
+
+  <!-- ===== Wheels: fl/fr/rl/rr ===== -->
+  <xacro:mecanum_wheel name="fl" x="${wheel_x}"  y="${wheel_y}"  z="${wheel_z}" flip="-1"/>
+  <xacro:mecanum_wheel name="fr" x="${wheel_x}"  y="${-wheel_y}" z="${wheel_z}"/>
+  <xacro:mecanum_wheel name="rl" x="${-wheel_x}" y="${wheel_y}"  z="${wheel_z}" flip="-1"/>
+  <xacro:mecanum_wheel name="rr" x="${-wheel_x}" y="${-wheel_y}" z="${wheel_z}"/>
+
+  <!-- ===== Fork (prismatic lift) ===== -->
+  <link name="fork_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+      <geometry>
+        <mesh filename="package://mecanum_forklift_description/meshes/fork.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="fork_grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+      <geometry>
+        <mesh filename="package://mecanum_forklift_description/meshes/fork.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="${fork_mass}" x="0.178" y="0.2" z="0.088">
+      <origin xyz="0.0 0 0.0" rpy="0 0 ${pi/2}"/>
+    </xacro:box_inertia>
+  </link>
+
+  <joint name="fork_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="fork_link"/>
+    <!-- fork STL spans z -3..85 mm; underside sits fork_ground_gap above the ground at lift = 0 -->
+    <origin xyz="${fork_x} 0 ${-ground_clearance + 0.003 + fork_ground_gap}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="${fork_lift_max}" effort="100.0" velocity="0.1"/>
+    <dynamics damping="1.0" friction="0.5"/>
+  </joint>
+
+  <!-- ===== Sensors ===== -->
+  <!-- YDLidar X2 on the top of the base -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://mecanum_forklift_description/meshes/ydlidar_x2_assy.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.04" length="0.04"/></geometry>
+    </collision>
+    <xacro:box_inertia m="0.2" x="0.08" y="0.08" z="0.04">
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+    </xacro:box_inertia>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 ${base_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Front camera, mounted on top of the fork carriage (moves with fork_joint).
+       Fork STL top is at z = 85 mm; x = 0 is just ahead of the base front face. -->
+  <link name="front_camera_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://mecanum_forklift_description/meshes/front_camera.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry><box size="0.03 0.03 0.03"/></geometry>
+    </collision>
+    <xacro:box_inertia m="0.05" x="0.03" y="0.03" z="0.03">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:box_inertia>
+  </link>
+
+  <joint name="front_camera_joint" type="fixed">
+    <parent link="fork_link"/>
+    <child link="front_camera_link"/>
+    <origin xyz="0.0 0 0.01" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Optical frame (REP-103: z forward, x right, y down) for vision consumers -->
+  <link name="front_camera_optical_frame"/>
+  <joint name="front_camera_optical_joint" type="fixed">
+    <parent link="front_camera_link"/>
+    <child link="front_camera_optical_frame"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <!-- IMU at the chassis centre (base_link origin is bottom centre) -->
+  <link name="imu_link">
+    <!-- tiny inertial: Gazebo drops massless links, taking the sensor with them -->
+    <xacro:box_inertia m="0.01" x="0.02" y="0.02" z="0.01">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:box_inertia>
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Gazebo (Fortress) ===== -->
+  <xacro:include filename="mecanum_forklift.gazebo.xacro"/>
+
+</robot>

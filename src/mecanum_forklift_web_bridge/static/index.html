@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forklift dashboard</title>
+<style>
+  :root { --bg:#f6f7f9; --fg:#1b1f24; --card:#ffffff; --line:#d7dbe0; --accent:#1f6feb;
+          --bad:#c62828; --ok:#2e7d32; --warn:#b26a00; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171a; --fg:#e6e8eb; --card:#1d2227; --line:#33393f; --accent:#6ea8ff;
+            --bad:#ff6b6b; --ok:#6fd08c; --warn:#ffb454; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.4 system-ui, sans-serif; }
+  header { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 16px;
+           border-bottom:1px solid var(--line); background:var(--card); }
+  h1 { font-size:18px; margin:0; flex:1 1 auto; }
+  main { display:grid; gap:12px; padding:12px 16px; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  h2 { font-size:14px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.04em; opacity:.75; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; }
+  dt { opacity:.7; } dd { margin:0; font-variant-numeric:tabular-nums; }
+  label { display:block; margin:6px 0 2px; font-size:13px; opacity:.8; }
+  input, select, button { font:inherit; padding:6px 8px; border-radius:6px; border:1px solid var(--line);
+                          background:var(--bg); color:var(--fg); width:100%; }
+  button { cursor:pointer; background:var(--accent); color:#fff; border:0; margin-top:8px; }
+  button.secondary { background:transparent; color:var(--fg); border:1px solid var(--line); }
+  #estop { background:var(--bad); font-weight:700; font-size:16px; padding:10px 18px; width:auto; margin:0; }
+  #banner { display:none; padding:8px 16px; background:var(--bad); color:#fff; font-weight:600; }
+  .pill { padding:2px 8px; border-radius:99px; border:1px solid var(--line); font-size:13px; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); } .warn { color:var(--warn); }
+  img { width:100%; border-radius:6px; background:#000; min-height:120px; }
+  pre { white-space:pre-wrap; margin:8px 0 0; font-size:13px; }
+  .row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+</style>
+</head>
+<body>
+<div id="banner">E-STOP ENGAGED - release it on the robot (ros2 service call /estop/release std_srvs/srv/Trigger)</div>
+<header>
+  <h1>Mecanum forklift</h1>
+  <span class="pill" id="link">not connected</span>
+  <input id="token" type="password" placeholder="API token" style="width:240px" autocomplete="off">
+  <button id="connect" style="width:auto;margin:0">Connect</button>
+  <button id="estop">E-STOP</button>
+</header>
+<main>
+  <section><h2>Status</h2>
+    <dl>
+      <dt>Pose (map)</dt><dd id="pose">-</dd>
+      <dt>Lift</dt><dd id="lift">-</dd>
+      <dt>Mission</dt><dd id="mission">-</dd>
+      <dt>Step</dt><dd id="step">-</dd>
+      <dt>Mission manager</dt><dd id="mm">-</dd>
+      <dt>Battery</dt><dd>not available</dd>
+      <dt>Updated</dt><dd id="age">-</dd>
+    </dl>
+  </section>
+  <section><h2>Mission</h2>
+    <label for="pick">Pick dock</label><select id="pick"></select>
+    <label for="drop">Drop dock</label><select id="drop"></select>
+    <label><input id="useret" type="checkbox" style="width:auto"> Drive to a return pose afterwards</label>
+    <div class="row">
+      <div><label for="rx">x (m)</label><input id="rx" type="number" step="0.1" value="0"></div>
+      <div><label for="ry">y (m)</label><input id="ry" type="number" step="0.1" value="0"></div>
+      <div><label for="ryaw">yaw (rad)</label><input id="ryaw" type="number" step="0.1" value="0"></div>
+    </div>
+    <button id="submit">Start mission</button>
+    <button id="cancel" class="secondary">Cancel mission</button>
+    <pre id="result"></pre>
+  </section>
+  <section><h2>Camera</h2><img id="video" alt="camera stream"></section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let token = sessionStorage.getItem('token') || '';
+let lastMission = '';
+$('token').value = token;
+const api = (path, opts = {}) => fetch(path, {...opts, headers: {...(opts.headers || {}),
+  Authorization: 'Bearer ' + token, 'Content-Type': 'application/json'}});
+const show = (text, cls) => { $('result').textContent = text; $('result').className = cls || ''; };
+
+async function loadDocks() {
+  const r = await api('/docks'); if (!r.ok) throw new Error('docks: ' + r.status);
+  const docks = await r.json();
+  for (const [sel, op] of [['pick', 'pick'], ['drop', 'drop']]) {
+    $(sel).innerHTML = Object.entries(docks).filter(([, d]) => d.operation === op)
+      .map(([name]) => `<option>${name}</option>`).join('');
+  }
+}
+
+function render(s) {
+  $('banner').style.display = s.estop ? 'block' : 'none';
+  $('pose').textContent = s.pose ? `x ${s.pose.x} y ${s.pose.y} yaw ${s.pose.yaw}` : 'unknown';
+  $('lift').textContent = s.lift ? `${s.lift.state}, ${(s.lift.height * 1000).toFixed(0)} mm` : 'unknown';
+  const m = s.mission;
+  $('mission').textContent = `${m.mission_id || '-'}: ${m.state}${m.error_code ? ' (' + m.error_code + ')' : ''}`;
+  $('step').textContent = m.total_steps ? `${m.step_index}/${m.total_steps}, attempt ${m.attempt}` : '-';
+  $('mm').innerHTML = s.mission_manager_available ? '<span class="ok">available</span>' : '<span class="bad">not available</span>';
+  $('age').textContent = new Date(s.time * 1000).toLocaleTimeString();
+  if (s.video_url && !$('video').src) $('video').src = s.video_url;
+}
+
+async function stream() {
+  const r = await api('/events');
+  if (!r.ok) throw new Error('events: ' + r.status);
+  $('link').textContent = 'connected'; $('link').className = 'pill ok';
+  const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '';
+  for (;;) {
+    const {value, done} = await reader.read(); if (done) break;
+    buf += dec.decode(value, {stream: true});
+    let i; while ((i = buf.indexOf('\n\n')) >= 0) {
+      const line = buf.slice(0, i); buf = buf.slice(i + 2);
+      if (line.startsWith('data: ')) render(JSON.parse(line.slice(6)));
+    }
+  }
+}
+
+async function connect() {
+  token = $('token').value.trim(); sessionStorage.setItem('token', token);
+  try { await loadDocks(); await stream(); }
+  catch (e) { $('link').textContent = String(e.message || e); $('link').className = 'pill bad'; setTimeout(connect, 3000); }
+}
+
+$('connect').onclick = connect;
+$('submit').onclick = async () => {
+  const body = {pick_dock_id: $('pick').value, drop_dock_id: $('drop').value};
+  if ($('useret').checked) body.return_pose = {x: +$('rx').value, y: +$('ry').value, yaw: +$('ryaw').value};
+  const r = await api('/missions', {method: 'POST', body: JSON.stringify(body)});
+  const j = await r.json();
+  if (r.ok) { lastMission = j.mission_id; show('submitted ' + lastMission, 'ok'); }
+  else show(`${r.status} ${j.error_code}: ${j.message}`, 'bad');
+};
+$('cancel').onclick = async () => {
+  if (!lastMission) return show('no mission submitted from this page', 'warn');
+  const r = await api(`/missions/${lastMission}/cancel`, {method: 'POST'}); const j = await r.json();
+  show(r.ok ? 'cancel requested' : `${r.status} ${j.error_code}: ${j.message}`, r.ok ? 'ok' : 'bad');
+};
+$('estop').onclick = async () => {
+  const r = await api('/estop', {method: 'POST'}); const j = await r.json();
+  show(r.ok ? 'E-STOP engaged (' + (j.via || '') + ')' : `${r.status} ${j.error_code}`, r.ok ? 'warn' : 'bad');
+};
+if (token) connect();
+</script>
+</body>
+</html>

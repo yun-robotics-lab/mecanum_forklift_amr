@@ -1,0 +1,32 @@
+# Run a pallet transport mission: pick at one dock, drop at another, optionally drive to a return pose.
+# One mission at a time: a second goal while a mission is active is rejected.
+# Cancel: the active child goal is cancelled, the robot is stopped, the fork is left where it is
+# (held), the result is error_code "CANCELED".
+# Timeouts (parameters of the mission node): per navigation, per dock, per mission.
+
+# Goal
+string mission_id                         # free text, echoed in feedback / status
+string mission_type                       # "PALLET_TRANSPORT" (only type so far)
+string pick_dock_id                       # dock database entry with operation pick
+string drop_dock_id                       # dock database entry with operation drop
+geometry_msgs/PoseStamped return_pose     # empty header.frame_id = do not drive back
+
+---
+# Result
+# error_code: "" (success) | INVALID_MISSION | MISSION_TIMEOUT | CANCELED | NAV_FAILED |
+#   or the DockPallet error code of the failed step (STAGING_FAILED, MARKER_NOT_FOUND,
+#   LIFT_FAILED, ALIGN_FAILED, TIMEOUT, ...)
+# failed_step: VALIDATE | PICK | DROP | RETURN ("" on success)
+bool success
+string error_code
+string failed_step
+string message
+
+---
+# Feedback
+string mission_id
+string state                              # VALIDATE | PICK | DROP | RETURN | DONE
+int32 step_index                          # 1-based
+int32 total_steps
+float32 progress                          # 0..100
+string message

@@ -1,0 +1,95 @@
+# Dock database of worlds/warehouse_v2.sdf. Field meanings: see dock_database.yaml.
+# The whole file is UNTESTED in simulation (clearances were checked on the maps only).
+# map_after_* files are in the navigation package maps/. All drop maps assume pallet_1 is carried.
+#
+# `pallet` names the pallet an entry's maps are made for: a drop is refused (WRONG_PALLET) if another
+# pallet is carried. Rack docks change no map (the whole rack is painted), so they take any pallet.
+docks:
+  pallet_pick_1:            # pallet_1 at (0.9, 0.0), marker id 0 on its -x end
+    type: pallet_pick_dock
+    frame: odom             # valid for a robot spawned at (0, 0, yaw 0): odom = world
+    pose: [0.415, 0.0, 0.0]
+    marker_id: 0
+    lift: 0.06
+    pallet: pallet_1
+    map_after_pick: warehouse_v2_nav_pallet_1_picked.yaml
+
+  # Drop at the dropoff station: pad centre (3.7, -2.0); the carried pallet centre is 0.335 m
+  # ahead of base_link. Poses are in the map frame (AMCL accuracy, no marker).
+  pallet_drop_1:
+    type: pallet_drop_dock
+    operation: drop
+    pallet: pallet_1
+    frame: map
+    pose: [3.365, -2.0, 0.0]
+    staging_pose: [2.965, -2.0, 0.0]
+    final_pose: [3.365, -2.0, 0.0]
+    lift: 0.0
+    backoff: 0.30
+    map_after_drop: warehouse_v2_nav_pallet_1_dropped.yaml
+
+  # Floor drops (no pad or marker)
+  pallet_drop_2:            # west floor, facing -x, pallet centre (-1.8, 0.0)
+    type: pallet_drop_dock
+    operation: drop
+    pallet: pallet_1
+    frame: map
+    pose: [-1.465, 0.0, 3.14159]
+    staging_pose: [-1.065, 0.0, 3.14159]
+    final_pose: [-1.465, 0.0, 3.14159]
+    lift: 0.0
+    backoff: 0.30
+    map_after_drop: warehouse_v2_nav_pallet_1_dropped_2.yaml
+  pallet_drop_3:            # north-east floor, pallet centre (2.0, 1.8)
+    type: pallet_drop_dock
+    operation: drop
+    pallet: pallet_1
+    frame: map
+    pose: [1.665, 1.8, 0.0]
+    staging_pose: [1.265, 1.8, 0.0]
+    final_pose: [1.665, 1.8, 0.0]
+    lift: 0.0
+    backoff: 0.30
+    map_after_drop: warehouse_v2_nav_pallet_1_dropped_3.yaml
+
+  # ---- Rack docks (UNTESTED) ----------------------------------------------------------------
+  # Rack deck top 0.060 m, front edge y = 2.22. A pallet stands 3 cm over the front edge (centre
+  # y = 2.29), otherwise the chassis (front 0.207 m ahead of base_link, below deck height) would
+  # hit the deck. At the final pose base_link is at y = 1.955: 5.8 cm between chassis and deck.
+  # Fork heights (tine underside = 0.01 + lift): 0.067 enters/leaves the pallet pocket above the
+  # deck, 0.109 holds the pallet 2.5 cm above the deck. backoff 0.40 ends at the staging pose,
+  # with the pallet clear of the rack.
+  rack_pick_1:              # pallet_rack_1 in rack_a1, marker id 1 at y = 2.20
+    type: pallet_pick_dock
+    frame: map
+    pose: [-0.8, 1.805, 1.570796]    # coarse-approach end (0.395 m before the marker)
+    marker_id: 1
+    pallet: pallet_rack_1
+    approach_lift: 0.067
+    lift: 0.109
+    backoff: 0.40
+    carry_lift: 0.06
+  # Rack drops have no marker: the target comes from AMCL at the staging pose. Measured floor-drop
+  # errors were 4-7 cm; a rack drop tolerates about 5 cm short and 5.8 cm deep.
+  rack_drop_1:              # rack_a1 (only when it is empty)
+    type: pallet_drop_dock
+    operation: drop
+    frame: map
+    pose: [-0.8, 1.955, 1.570796]
+    staging_pose: [-0.8, 1.555, 1.570796]
+    final_pose: [-0.8, 1.955, 1.570796]
+    approach_lift: 0.109
+    lift: 0.067
+    backoff: 0.40
+    fork_after: 0.0
+  rack_drop_2:              # rack_a2 (empty in the world file)
+    type: pallet_drop_dock
+    operation: drop
+    frame: map
+    pose: [0.8, 1.955, 1.570796]
+    staging_pose: [0.8, 1.555, 1.570796]
+    final_pose: [0.8, 1.955, 1.570796]
+    approach_lift: 0.109
+    lift: 0.067
+    backoff: 0.40
+    fork_after: 0.0

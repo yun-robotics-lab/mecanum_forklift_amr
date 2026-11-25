@@ -1,0 +1,21 @@
+/**/pallet_dock_workflow:
+  ros__parameters:
+    use_sim_time: true
+    dock_database: ''            # set by the launch file
+    total_timeout: 180.0         # s, whole DockPallet sequence incl. staging navigation (sim time)
+    staging_x_offset: -0.25      # m, must equal pallet_pick_dock.staging_x_offset in docking_server.yaml
+    lift_speed: 0.0              # m/s, 0 = lift controller default
+    marker_node: aruco_node
+    stop_distance: 0.245         # m, final base_link before the marker (see dock_database.yaml)
+    latch_distance: 0.5          # m, marker sightings closer than this are not used (out of view)
+    align_timeout: 30.0          # s
+    # internal alignment tolerance = half of the acceptance tolerance (10 mm, 10 mm, 2 deg), as
+    # margin for the marker pose error (~1-3 mm) and odometry
+    tol_long: 0.005              # m
+    tol_lat: 0.005               # m
+    tol_yaw_deg: 1.0             # deg
+    # Costmap footprints [x1, y1, x2, y2, ...] published on local/global_costmap/footprint.
+    # Loaded: the pallet adds 0.067 m ahead of the tine tips (tip 0.368 m, 0.133 m insertion,
+    # 0.20 m deep pallet -> 0.435 m); its 0.26 m width stays inside the chassis width (+-0.154 m).
+    unloaded_footprint: [0.368, 0.154, 0.368, -0.154, -0.205, -0.154, -0.205, 0.154]
+    loaded_footprint: [0.435, 0.154, 0.435, -0.154, -0.205, -0.154, -0.205, 0.154]

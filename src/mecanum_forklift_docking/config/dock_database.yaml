@@ -1,0 +1,94 @@
+# Dock database read by opennav_docking (type/frame/pose) and by the DockPallet workflow
+# (marker_id, lift). pose = [x, y, yaw] of base_link at the end of the coarse approach, in `frame`;
+# staging pose = this pose shifted by the plugin's staging_x_offset. The live marker pose
+# (aruco_dock_pose) replaces it for the final approach.
+# The final base_link pose is 0.245 m before the marker
+# (workflow.yaml `stop_distance`): fork tip reaches base_link + 0.368 m, so the tines go 0.133 m
+# into the 0.20 m pallet (past its centre of mass at 0.10 m) and the carriage front (fork_link
+# + 0.010 m) stops 7 mm short of the pallet end face. Do not reduce it further.
+docks:
+  pallet_pick_1:            # pallet_1 at (0.9, 0.0), marker id 0 on its -x end
+    type: pallet_pick_dock
+    frame: odom
+    pose: [0.415, 0.0, 0.0]    # coarse-approach end (0.395 m before the marker)
+    marker_id: 0
+    lift: 0.06              # m, fork height after engaging (sim placeholder, limit 0.12)
+    # curated Nav2 map (navigation package maps/) without this pallet and its box, loaded after the
+    # lift; the full map is restored when the next dock starts
+    map_after_pick: simple_warehouse_nav_pallet_1_picked.yaml
+  # UNTESTED: pallet_2 at (-1.0, -1.6), no box. In simple_warehouse.sdf marker id 1 is a separate
+  # static model, not fixed to the pallet, so lifting is expected to collide with it.
+  pallet_pick_2:
+    type: pallet_pick_dock
+    frame: odom
+    pose: [-1.485, -1.6, 0.0]
+    marker_id: 1
+    lift: 0.06
+    map_after_pick: simple_warehouse_nav_pallet_2_picked.yaml
+  # UNTESTED: pallet_3 at (-1.0, 1.4), with box_3. In simple_warehouse.sdf marker id 2 is a separate
+  # static model, not fixed to the pallet, so lifting is expected to collide with it.
+  pallet_pick_3:
+    type: pallet_pick_dock
+    frame: odom
+    pose: [-1.485, 1.4, 0.0]
+    marker_id: 2
+    lift: 0.06
+    map_after_pick: simple_warehouse_nav_pallet_3_picked.yaml
+  # Drop at the sim dropoff station (pad centre (2.7, -1.6)). With a pallet on the forks the
+  # fork-mounted camera looks into the load, so a drop uses the map-frame (AMCL) poses below and no
+  # marker. The carried pallet spans 0.235..0.435 m ahead of base_link, i.e. its centre is 0.335 m
+  # ahead. operation: drop lowers the fork to `lift` instead of lifting; map_after_drop is the
+  # curated map with the pallet at its new place.
+  pallet_drop_1:
+    type: pallet_drop_dock
+    operation: drop
+    frame: map
+    pose: [2.365, -1.6, 0.0]          # = final_pose (opennav needs a pose; not used for a drop)
+    staging_pose: [1.965, -1.6, 0.0]  # Nav2 goal, pallet on the forks, 0.4 m before the final pose
+    final_pose: [2.365, -1.6, 0.0]    # base_link: pallet centre (0.335 m ahead) on the pad centre
+    lift: 0.0                         # fork height after the drop
+    backoff: 0.30                     # m reversed after lowering
+    map_after_drop: simple_warehouse_nav_pallet_1_dropped.yaml
+
+  # UNTESTED floor drops (no pad or marker; position accuracy is AMCL only). Their maps assume the
+  # carried pallet is pallet_1: it is removed from its start slot and painted at the drop place.
+  # Do not use them with another pallet until they have maps of their own.
+  pallet_drop_2:              # east lane, pallet centre (2.2, 0.0)
+    type: pallet_drop_dock
+    operation: drop
+    frame: map
+    pose: [1.865, 0.0, 0.0]
+    staging_pose: [1.465, 0.0, 0.0]
+    final_pose: [1.865, 0.0, 0.0]
+    lift: 0.0
+    backoff: 0.30
+    map_after_drop: simple_warehouse_nav_pallet_1_dropped_2.yaml
+  pallet_drop_3:              # south floor, pallet centre (1.0, -1.8)
+    type: pallet_drop_dock
+    operation: drop
+    frame: map
+    pose: [0.665, -1.8, 0.0]
+    staging_pose: [0.265, -1.8, 0.0]
+    final_pose: [0.665, -1.8, 0.0]
+    lift: 0.0
+    backoff: 0.30
+    map_after_drop: simple_warehouse_nav_pallet_1_dropped_3.yaml
+  pallet_drop_4:              # west lane facing -x, pallet centre (-2.3, 0.0)
+    type: pallet_drop_dock
+    operation: drop
+    frame: map
+    pose: [-1.965, 0.0, 3.14159]
+    staging_pose: [-1.565, 0.0, 3.14159]
+    final_pose: [-1.965, 0.0, 3.14159]
+    lift: 0.0
+    backoff: 0.30
+    map_after_drop: simple_warehouse_nav_pallet_1_dropped_4.yaml
+
+  # Test-only entry for failure injection: lift target above the 0.12 m limit -> LIFT_FAILED.
+  test_lift_out_of_range:
+    test_only: true                 # hidden from the web API
+    type: pallet_pick_dock
+    frame: odom
+    pose: [0.415, 0.0, 0.0]
+    marker_id: 0
+    lift: 0.20

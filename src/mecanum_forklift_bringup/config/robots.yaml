@@ -1,0 +1,7 @@
+# Fleet for the multi-robot launches (same file for robot_world.launch.py and robot_bringup.launch.py).
+# name = ROS namespace and Gazebo model name; x/y/z in the world frame (m), yaw in rad.
+# Positions must be free floor in simple_warehouse.sdf (checked against the nav map).
+# Override on the command line with robots:='[{"name": "robot1", "x_pose": 0.0, "y_pose": 0.0}]'.
+robots:
+  - {name: robot1, x_pose: 0.0, y_pose: 0.0, z_pose: 0.05, yaw: 0.0}
+  - {name: robot2, x_pose: -1.8, y_pose: -1.6, z_pose: 0.05, yaw: 0.0}

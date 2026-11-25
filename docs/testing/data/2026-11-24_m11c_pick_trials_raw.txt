@@ -1,0 +1,27 @@
+# pick_trials.py raw output (simulation). Columns: trial, start pose, pallet lateral/yaw offset, result,
+# dock error long/lat (mm) and yaw (deg) when the lift starts, max pallet tilt (deg), pallet drift on the forks
+# during the loaded drive (cm), carry goal status, pushed objects, seconds (wall).
+# Run 1 (interrupted by a machine power loss after trial 4; the stack had been running with 1-4 vision respawns):
+ 1 (0.0, -1.0, 0) +0.00/ +0 OK     -5.9   -2.4  0.48  0.00    0.1 SUCCEEDED  -   86
+ 2 (1.2, 1.0, 0)  +0.05/ +0 OK     -6.0   -2.0  0.48  0.00    0.1 SUCCEEDED  -   87
+ 3 (-1.8, 0.0, 180) -0.05/ +0 OK   -6.0    2.8 -0.58  0.00    0.1 SUCCEEDED  -   98
+ 4 (-1.8, -1.6, 0) +0.00/+10 OK    -5.8    3.0 -0.65  0.00    0.1 SUCCEEDED  -   97
+# Batch 2 (trials 5-9) after a fresh boot:
+ 5 (0.0, 1.0, 180) +0.00/-10 OK                           -6.6   -2.7  0.66  0.00    0.0 SUCCEEDED  -               68
+ 6 (0.0, -1.0, 0) +0.05/+10 OK                           -5.4    2.9 -0.44  0.00    0.1 SUCCEEDED  -               61
+ 7 (1.2, 1.0, 0)  -0.05/-10 OK                           -5.7   -2.4  0.62  0.00    0.0 SUCCEEDED  -               77
+ 8 (-1.8, 0.0, 180) +0.00/ +0 OK                           -6.0    0.4 -0.34  0.00    0.1 SUCCEEDED  -               81
+ 9 (-1.8, -1.6, 0) +0.05/ +0 OK                           -5.6   -2.1  0.48  0.00    0.0 SUCCEEDED  -               71
+# Batch 3 (trials 10-14):
+10 (0.0, 1.0, 180) -0.05/ +0 OK                           -6.0    2.4 -0.45  0.00    0.0 SUCCEEDED  -               56
+11 (0.0, -1.0, 0) +0.00/+10 OK                           -6.1    2.4 -0.45  0.00    0.0 SUCCEEDED  -               57
+12 (1.2, 1.0, 0)  +0.00/-10 OK                           -6.4   -2.6  0.62  0.00    0.1 SUCCEEDED  -               68
+13 (-1.8, 0.0, 180) +0.05/+10 OK                           -5.5    2.5 -0.55  0.00    0.0 SUCCEEDED  -               79
+14 (-1.8, -1.6, 0) -0.05/-10 OK                           -6.1   -2.6  0.62  0.00    0.1 SUCCEEDED  -               74
+# Batch 4 (trials 15-20):
+15 (0.0, 1.0, 180) +0.00/ +0 OK                           -6.0    0.8 -0.31  0.00    0.0 SUCCEEDED  -               57
+16 (0.0, -1.0, 0) +0.05/ +0 OK                           -6.0   -3.0  0.70  0.00    0.0 SUCCEEDED  -               61
+17 (1.2, 1.0, 0)  -0.05/ +0 OK                           -5.8    3.5 -0.63  0.00    0.1 SUCCEEDED  -               90
+18 (-1.8, 0.0, 180) +0.00/+10 OK                           -5.6    3.0 -0.60  0.00    0.1 SUCCEEDED  -               77
+19 (-1.8, -1.6, 0) +0.00/-10 OK                           -6.0   -3.0  0.69  0.00    0.0 SUCCEEDED  -               74
+20 (0.0, 1.0, 180) +0.05/+10 OK                           -5.7    3.6 -0.72  0.00    0.1 SUCCEEDED  -               76

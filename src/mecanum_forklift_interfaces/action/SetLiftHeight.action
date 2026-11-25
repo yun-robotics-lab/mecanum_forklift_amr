@@ -1,0 +1,33 @@
+# Move the fork to an absolute height.
+# Preconditions: lift state is STATE_IDLE and no teleop move is running. Otherwise the goal is
+# accepted and aborted at once with RESULT_REJECTED_NOT_IDLE / RESULT_REJECTED_OUT_OF_RANGE
+# (so the client gets a reason). Speed 0.0 = default; above the controller maximum it is clamped.
+# Cancel: the lift stops and holds its current position; result code RESULT_CANCELED.
+# Timeout: controller-configured; ends with RESULT_TIMEOUT and FAULT_TIMEOUT latched.
+# A measured height outside the limits (FAULT_OVER_LIMIT) is reported as
+# RESULT_REJECTED_OUT_OF_RANGE (no dedicated code). Feedback rate: 10 Hz.
+
+# Goal
+float32 target_height   # absolute fork height [m]; must lie within [0, max_height]
+float32 speed           # max fork speed [m/s]; 0.0 = controller default
+
+---
+# Result
+uint8 RESULT_SUCCESS = 0
+uint8 RESULT_REJECTED_NOT_IDLE = 1
+uint8 RESULT_REJECTED_OUT_OF_RANGE = 2
+uint8 RESULT_TIMEOUT = 3
+uint8 RESULT_NO_FEEDBACK = 4
+uint8 RESULT_STALL = 5
+uint8 RESULT_CANCELED = 6
+uint8 RESULT_SAFETY_STOP = 7
+
+bool success
+uint8 error_code        # RESULT_*
+float32 final_height    # fork height when the action ended [m]
+string message          # human-readable detail
+
+---
+# Feedback
+float32 current_height  # [m]
+float32 remaining       # target_height - current_height [m]

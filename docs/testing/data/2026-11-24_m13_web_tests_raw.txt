@@ -1,0 +1,28 @@
+listeners (127.0.0.1 only)                   PASS  {8000: ['127.0.0.1:8000'], 9090: ['127.0.0.1:9090'], 8080: ['127.0.0.1:8080']}
+auth + invalid requests (no side effect)     PASS  9 invalid + 4 auth cases, robot idle
+video stream + dashboard                     PASS  multipart/x-mixed-replace;boundary=bound, 157882 bytes, dashboard 200
+passed 3/3: {1: 'PASS', 2: 'PASS', 8: 'PASS'}
+rosbridge: allowed telemetry readable        PASS  {'/lift_state': 20, '/mission_status': 4}
+rosbridge: /odom not in the allow-list       PASS  
+rosbridge: no publish to velocity topics     PASS  delivered none, moved 0.0 mm, /cmd_vel idle msgs 9
+rosbridge: services refused                  PASS  None
+passed 1/1: {7: 'PASS'}
+REST mission 1                               PASS  event rate 2.04 Hz, state DONE, pallet 5.3 cm from the pad centre
+event stream rate (>= 1.8 Hz)                PASS  2.04 Hz
+REST mission 2                               PASS  state DONE, pallet 5.9 cm from the pad centre
+REST mission 3                               PASS  state DONE, pallet 5.9 cm from the pad centre
+passed 1/1: {3: 'PASS'}
+cancel over REST                             PASS  200, CANCELED, stopped True, orphans -
+mission manager down -> 503                  PASS  503, health {'status': 'ok', 'ros': False}
+mission manager back -> ros true             PASS  True
+passed 2/2: {4: 'PASS', 5: 'PASS'}
+e-stop engages and stops the robot           PASS  moving before True, stopped after 0.38 s
+e-stop cancels the mission                   PASS  CANCELED, orphans -
+mission refused while engaged                PASS  423
+REST cannot release the e-stop               PASS  403 LOCAL_ONLY
+rosbridge cannot release the e-stop          PASS  reply None
+teleop cannot override the e-stop            PASS  moved 0.0 mm
+local release re-enables missions            PASS  released True, POST 202
+passed 1/1: {6: 'PASS'}
+e-stop with the mission layer down           PASS  speed before 0.20 m/s, stopped after 0.25 s, held against teleop True
+passed 1/1: {9: 'PASS'}

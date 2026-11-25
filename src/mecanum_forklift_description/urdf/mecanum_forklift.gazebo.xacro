@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<!-- Gazebo Fortress (Ignition Gazebo 6) extensions.
+     Included at the end of mecanum_forklift.urdf.xacro.
+     World-level systems (physics, sensors, scene-broadcaster, ...) live in worlds/. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Gazebo topic namespace for multi-robot runs (gz_ns:=/robot1 -> topics /robot1/cmd_vel ...).
+       Empty (default) keeps the plain /cmd_vel, /scan ... topics of the single-robot launch. -->
+  <xacro:arg name="gz_ns" default=""/>
+  <xacro:property name="gz_ns_value" value="$(arg gz_ns)"/>
+  <xacro:property name="gzp" value="${gz_ns_value + '/' if gz_ns_value else ''}"/>
+  <!-- sensor_profile:=light (multi-robot runs on a CPU-only machine): lidar 180 samples at 5 Hz and no
+       camera sensor; the default `full` keeps the 360 samples / 10 Hz lidar and the camera. -->
+  <xacro:arg name="sensor_profile" default="full"/>
+  <xacro:property name="light_sensors" value="${'$(arg sensor_profile)' == 'light'}"/>
+
+
+  <!-- Keep these fixed joints so lidar/camera stay as separate frames in SDF -->
+  <gazebo reference="lidar_joint"><preserveFixedJoint>true</preserveFixedJoint></gazebo>
+  <gazebo reference="front_camera_joint"><preserveFixedJoint>true</preserveFixedJoint></gazebo>
+  <gazebo reference="front_camera_optical_joint"><preserveFixedJoint>true</preserveFixedJoint></gazebo>
+  <gazebo reference="imu_joint"><preserveFixedJoint>true</preserveFixedJoint></gazebo>
+
+  <!-- ===== Mecanum wheel friction =====
+       mu1 acts along fdir1 (grip direction, perpendicular to the roller axis), mu2 = 0 lets the
+       wheel slide along the roller. The diagonal directions follow the Fortress mecanum_drive.sdf
+       example (X roller layout seen from above, x forward, y left). -->
+  <xacro:macro name="mecanum_wheel_gazebo" params="name fdir1">
+    <gazebo reference="${name}_wheel_link">
+      <mu1>1.0</mu1>
+      <mu2>0.0</mu2>
+      <fdir1>${fdir1}</fdir1>
+      <kp>1000000.0</kp>
+      <kd>100.0</kd>
+      <minDepth>0.001</minDepth>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:mecanum_wheel_gazebo name="fl" fdir1="1 -1 0"/>
+  <xacro:mecanum_wheel_gazebo name="fr" fdir1="1 1 0"/>
+  <xacro:mecanum_wheel_gazebo name="rl" fdir1="1 1 0"/>
+  <xacro:mecanum_wheel_gazebo name="rr" fdir1="1 -1 0"/>
+
+  <!-- ===== Mecanum drive: /cmd_vel (geometry_msgs/Twist) -> 4 wheel joints =====
+       Fortress 6.18 MecanumDrive does NOT publish odometry (it never updates its odometry object,
+       unlike DiffDrive), so odom_topic/tf_topic/child_frame_id/odom_publish_frequency would be
+       silently ignored. Odometry comes from the OdometryPublisher system below. -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-mecanum-drive-system"
+            name="ignition::gazebo::systems::MecanumDrive">
+      <front_left_joint>fl_wheel_joint</front_left_joint>
+      <front_right_joint>fr_wheel_joint</front_right_joint>
+      <back_left_joint>rl_wheel_joint</back_left_joint>
+      <back_right_joint>rr_wheel_joint</back_right_joint>
+      <wheel_separation>${2 * wheel_y}</wheel_separation>
+      <wheelbase>${2 * wheel_x}</wheelbase>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <topic>${gzp}cmd_vel</topic>
+      <min_acceleration>-2</min_acceleration>
+      <max_acceleration>2</max_acceleration>
+    </plugin>
+  </gazebo>
+
+  <!-- ===== Ground-truth odometry (test reference only) =====
+       Exact model pose from the simulator on /odom_ground_truth. Its TF goes to
+       /ground_truth/tf, which is NOT bridged, so mecanum_forklift_control/wheel_odometry is the
+       single owner of /odom and odom->base_footprint. The model origin is base_footprint. -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-odometry-publisher-system"
+            name="ignition::gazebo::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_topic>${gzp}odom_ground_truth</odom_topic>
+      <tf_topic>${gzp}ground_truth/tf</tf_topic>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>2</dimensions>
+    </plugin>
+  </gazebo>
+
+  <!-- ===== Joint states (wheels + fork) -> /joint_states ===== -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-joint-state-publisher-system"
+            name="ignition::gazebo::systems::JointStatePublisher">
+      <topic>${gzp}joint_states</topic>
+    </plugin>
+  </gazebo>
+
+  <!-- ===== Fork lift: position command (std_msgs/Float64, metres) on /fork/cmd_pos ===== -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-joint-position-controller-system"
+            name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>fork_joint</joint_name>
+      <topic>${gzp}fork/cmd_pos</topic>
+      <p_gain>5000</p_gain>
+      <i_gain>50</i_gain>
+      <d_gain>150</d_gain>
+      <i_max>50</i_max>
+      <i_min>-50</i_min>
+      <cmd_max>100</cmd_max>
+      <cmd_min>-100</cmd_min>
+    </plugin>
+  </gazebo>
+
+  <!-- ===== YDLidar X2: 2D lidar -> /scan ===== -->
+  <gazebo reference="lidar_link">
+    <sensor name="ydlidar_x2" type="gpu_lidar">
+      <pose>0 0 0.03 0 0 0</pose>
+      <topic>${gzp}scan</topic>
+      <ignition_frame_id>lidar_link</ignition_frame_id>
+      <update_rate>${5 if light_sensors else 10}</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>${180 if light_sensors else 360}</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>8.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <xacro:unless value="${light_sensors}">
+  <!-- ===== Front camera (on the fork carriage) -> /camera/image_raw + /camera/camera_info ===== -->
+  <gazebo reference="front_camera_link">
+    <sensor name="front_camera" type="camera">
+      <pose>0 0 0 0 0 0</pose>
+      <topic>${gzp}camera/image_raw</topic>
+      <camera_info_topic>${gzp}camera/camera_info</camera_info_topic>
+      <ignition_frame_id>front_camera_optical_frame</ignition_frame_id>
+      <update_rate>30</update_rate>
+      <always_on>true</always_on>
+      <camera>
+        <horizontal_fov>1.2</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>20</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+  </xacro:unless>
+
+  <!-- ===== IMU -> /imu (needs the world Imu system plugin) ===== -->
+  <gazebo reference="imu_link">
+    <sensor name="imu" type="imu">
+      <topic>${gzp}imu</topic>
+      <ignition_frame_id>imu_link</ignition_frame_id>
+      <update_rate>100</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+    </sensor>
+  </gazebo>
+
+</robot>

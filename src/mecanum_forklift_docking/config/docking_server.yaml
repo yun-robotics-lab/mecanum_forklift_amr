@@ -1,0 +1,75 @@
+# opennav_docking (Nav2 1.1.x Humble backport 0.0.2) for the mecanum forklift.
+# Its approach controller outputs vx and wz only (no vy), so it is used for the coarse approach
+# only; the final alignment is done by the DockPallet workflow with vx, vy and wz.
+/**/docking_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 20.0
+    initial_perception_timeout: 5.0
+    wait_charge_timeout: 5.0
+    dock_approach_timeout: 40.0
+    undock_linear_tolerance: 0.05
+    undock_angular_tolerance: 0.05
+    max_retries: 2
+    base_frame: base_link
+    fixed_frame: odom
+    dock_backwards: false
+    dock_prestaging_tolerance: 0.5
+    odom_topic: odom
+    odom_duration: 0.3
+    dock_database: ''          # set by the launch file (package share path)
+    dock_plugins: ['pallet_pick_dock', 'pallet_drop_dock']
+
+    pallet_pick_dock:
+      plugin: opennav_docking::SimpleChargingDock
+      docking_threshold: 0.05             # m, end of the coarse approach (the holonomic final
+                                          # alignment in the workflow does the last 0.15 m)
+      docking_threshold_angular: 0.035    # rad (2 deg)
+      staging_x_offset: -0.25             # m behind the dock pose -> 0.68 m from the marker
+      staging_yaw_offset: 0.0
+      use_external_detection_pose: true
+      # The camera sits on the fork root and loses the marker closer than ~0.28 m, so the last
+      # sighting (a static dock in odom) is kept for the blind final ~0.2 m.
+      external_detection_timeout: 30.0
+      # coarse approach ends 0.395 m before the marker = stop_distance (0.245, workflow.yaml) + 0.15
+      external_detection_translation_x: -0.395
+      external_detection_translation_y: 0.0
+      external_detection_rotation_roll: 0.0
+      external_detection_rotation_pitch: 0.0
+      external_detection_rotation_yaw: 0.0
+      filter_coef: 0.1
+      use_battery_status: false
+      use_stall_detection: false
+
+    # Drop at the dropoff station pad: the pallet centre must land on the pad centre, so base_link
+    # stops 0.51 m before the marker on the pad rear (stop_distance in dock_database.yaml).
+    pallet_drop_dock:
+      plugin: opennav_docking::SimpleChargingDock
+      docking_threshold: 0.05
+      docking_threshold_angular: 0.035
+      staging_x_offset: -0.25
+      staging_yaw_offset: 0.0
+      use_external_detection_pose: true
+      external_detection_timeout: 30.0
+      external_detection_translation_x: -0.66      # stop_distance 0.51 + 0.15
+      external_detection_translation_y: 0.0
+      external_detection_rotation_roll: 0.0
+      external_detection_rotation_pitch: 0.0
+      external_detection_rotation_yaw: 0.0
+      filter_coef: 0.1
+      use_battery_status: false
+      use_stall_detection: false
+
+    controller:
+      k_phi: 3.0
+      k_delta: 2.0
+      beta: 0.4
+      lambda: 2.0
+      v_linear_min: 0.02
+      v_linear_max: 0.3
+      v_angular_max: 0.3
+      slowdown_radius: 0.25
+      use_collision_detection: false      # no costmap before Stage 9
+      transform_tolerance: 0.1
+      projection_time: 5.0
+      simulation_time_step: 0.1

@@ -1,0 +1,19 @@
+# Lift controller parameters. Heights in m, speeds in m/s, times in s (node clock = sim time).
+# min/max must stay inside the URDF joint limits (0 .. fork_lift_max = 0.12).
+/**/lift_controller:
+  ros__parameters:
+    joint_name: fork_joint
+    cmd_topic: fork/cmd_pos        # Gazebo JointPositionController (bridged)
+    teleop_topic: fork/cmd_teleop  # std_msgs/Float64 target height from teleop (clamped here)
+    min_height: 0.0
+    max_height: 0.12
+    default_speed: 0.05
+    max_speed: 0.1                 # = URDF joint velocity limit
+    tolerance: 0.002               # |height - target| to count as reached
+    settle_time: 0.3               # must stay within tolerance this long
+    timeout_margin: 3.0            # goal timeout = travel / speed + margin
+    feedback_timeout: 1.0          # no /joint_states for this long -> FAULT_NO_FEEDBACK
+    stall_error: 0.02              # |commanded - measured| above this ...
+    stall_time: 1.5                # ... for this long -> FAULT_STALL
+    control_rate: 50.0
+    state_rate: 10.0

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!-- Moving cylinder (r 0.15 m, h 0.5 m, 2 kg) sliding along world y. The joint position is the
+     offset from the model pose, commanded by scripts/obstacle_mover.py. The force is limited to 10 N,
+     so a blocked cylinder pushes only weakly instead of driving through the robot.
+     The include must keep roll, pitch and yaw at 0. -->
+<sdf version="1.8">
+  <model name="dynamic_cylinder_y">
+    <link name="body">
+      <pose>0 0 0.26 0 0 0</pose>
+      <inertial><mass>2.0</mass><inertia><ixx>0.0529</ixx><iyy>0.0529</iyy><izz>0.0225</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+      <collision name="col"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision>
+      <visual name="vis"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.55 0.15 0.7 1</ambient><diffuse>0.55 0.15 0.7 1</diffuse></material></visual>
+      <visual name="band"><pose>0 0 0.15 0 0 0</pose><geometry><cylinder><radius>0.152</radius><length>0.05</length></cylinder></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+    </link>
+    <joint name="slide_joint" type="prismatic">
+      <parent>world</parent>
+      <child>body</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-3.0</lower><upper>3.0</upper></limit></axis>
+    </joint>
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>slide_joint</joint_name>
+      <topic>/obstacle_y/cmd_pos</topic>
+      <p_gain>200</p_gain><i_gain>0</i_gain><d_gain>40</d_gain>
+      <cmd_max>10</cmd_max><cmd_min>-10</cmd_min>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-state-publisher-system" name="ignition::gazebo::systems::JointStatePublisher">
+      <topic>/obstacle_y/joint_states</topic>
+      <joint_name>slide_joint</joint_name>
+    </plugin>
+  </model>
+</sdf>

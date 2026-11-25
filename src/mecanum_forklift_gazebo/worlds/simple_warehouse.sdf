@@ -1,0 +1,234 @@
+<?xml version="1.0" ?>
+<!-- Simple warehouse, 6 x 5 m. World name is shared with empty.sdf so config/bridge_config.yaml
+     (/world/mecanum_world/clock) works for every world in this package.
+     Robot spawns at the origin looking along +x. -->
+<sdf version="1.8">
+  <world name="mecanum_world">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="ignition-gazebo-user-commands-system" name="ignition::gazebo::systems::UserCommands"/>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu"/>
+
+    <gravity>0 0 -9.81</gravity>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    <light type="point" name="ceiling_light">
+      <pose>0 0 3 0 0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>10</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
+      <cast_shadows>false</cast_shadows>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>30 30</size></plane></geometry>
+          <surface><friction><ode><mu>50</mu></ode></friction></surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>30 30</size></plane></geometry>
+          <material>
+            <ambient>0.35 0.36 0.38 1</ambient>
+            <diffuse>0.35 0.36 0.38 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="warehouse_structure">
+      <static>true</static>
+      <link name="link">
+        <collision name="wall_n_col"><pose>0 2.55 0.2 0 0 0</pose><geometry><box><size>6.2 0.1 0.4</size></box></geometry></collision>
+        <visual name="wall_n_vis"><pose>0 2.55 0.2 0 0 0</pose><geometry><box><size>6.2 0.1 0.4</size></box></geometry><material><ambient>0.75 0.75 0.78 1</ambient><diffuse>0.75 0.75 0.78 1</diffuse></material></visual>
+        <collision name="wall_s_col"><pose>0 -2.55 0.2 0 0 0</pose><geometry><box><size>6.2 0.1 0.4</size></box></geometry></collision>
+        <visual name="wall_s_vis"><pose>0 -2.55 0.2 0 0 0</pose><geometry><box><size>6.2 0.1 0.4</size></box></geometry><material><ambient>0.75 0.75 0.78 1</ambient><diffuse>0.75 0.75 0.78 1</diffuse></material></visual>
+        <collision name="wall_e_col"><pose>3.05 0 0.2 0 0 0</pose><geometry><box><size>0.1 5.0 0.4</size></box></geometry></collision>
+        <visual name="wall_e_vis"><pose>3.05 0 0.2 0 0 0</pose><geometry><box><size>0.1 5.0 0.4</size></box></geometry><material><ambient>0.75 0.75 0.78 1</ambient><diffuse>0.75 0.75 0.78 1</diffuse></material></visual>
+        <collision name="wall_w_col"><pose>-3.05 0 0.2 0 0 0</pose><geometry><box><size>0.1 5.0 0.4</size></box></geometry></collision>
+        <visual name="wall_w_vis"><pose>-3.05 0 0.2 0 0 0</pose><geometry><box><size>0.1 5.0 0.4</size></box></geometry><material><ambient>0.75 0.75 0.78 1</ambient><diffuse>0.75 0.75 0.78 1</diffuse></material></visual>
+        <visual name="wall_stripe_n_vis"><pose>0 2.499 0.05 0 0 0</pose><geometry><box><size>6.0 0.002 0.04</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="start_0_vis"><pose>0 0.3 0.001 0 0 0</pose><geometry><box><size>0.7 0.03 0.002</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+        <visual name="start_1_vis"><pose>0 -0.3 0.001 0 0 0</pose><geometry><box><size>0.7 0.03 0.002</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+        <visual name="start_2_vis"><pose>0.35 0 0.001 0 0 0</pose><geometry><box><size>0.03 0.63 0.002</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+        <visual name="start_3_vis"><pose>-0.35 0 0.001 0 0 0</pose><geometry><box><size>0.03 0.63 0.002</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+        <visual name="dash_-10_vis"><pose>-2.5 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-9_vis"><pose>-2.25 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-8_vis"><pose>-2.0 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-7_vis"><pose>-1.75 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-6_vis"><pose>-1.5 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-5_vis"><pose>-1.25 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-4_vis"><pose>-1.0 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-3_vis"><pose>-0.75 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-2_vis"><pose>-0.5 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_-1_vis"><pose>-0.25 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_0_vis"><pose>0.0 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_1_vis"><pose>0.25 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_2_vis"><pose>0.5 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_3_vis"><pose>0.75 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_4_vis"><pose>1.0 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_5_vis"><pose>1.25 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_6_vis"><pose>1.5 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_7_vis"><pose>1.75 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_8_vis"><pose>2.0 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_9_vis"><pose>2.25 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="dash_10_vis"><pose>2.5 1.0 0.001 0 0 0</pose><geometry><box><size>0.15 0.03 0.002</size></box></geometry><material><ambient>0.95 0.8 0.1 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material></visual>
+        <visual name="lane_edge_a_vis"><pose>0 0.75 0.001 0 0 0</pose><geometry><box><size>5.6 0.02 0.002</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+        <visual name="lane_edge_b_vis"><pose>0 -0.75 0.001 0 0 0</pose><geometry><box><size>5.6 0.02 0.002</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+        <visual name="shelf_zone_vis"><pose>0 2.0 0.001 0 0 0</pose><geometry><box><size>2.0 0.02 0.002</size></box></geometry><material><ambient>0.9 0.3 0.1 1</ambient><diffuse>0.9 0.3 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <include>
+      <uri>model://charging_station</uri>
+      <name>charging_station_1</name>
+      <pose>-2.96 -1.6 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://charging_station</uri>
+      <name>charging_station_2</name>
+      <pose>-2.96 1.6 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://pickup_station</uri>
+      <name>pickup_station</name>
+      <pose>2.7 1.6 0.0 0 0 3.141593</pose>
+    </include>
+    <include>
+      <uri>model://dropoff_station</uri>
+      <name>dropoff_station</name>
+      <pose>2.7 -1.6 0.0 0 0 3.141593</pose>
+    </include>
+    <include>
+      <uri>model://mini_pallet</uri>
+      <name>pallet_pickup</name>
+      <pose>2.7 1.6 0.01 0 0 1.570796</pose>
+    </include>
+    <include>
+      <uri>model://cargo_box</uri>
+      <name>box_pickup</name>
+      <pose>2.7 1.6 0.066 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://mini_pallet</uri>
+      <name>pallet_1</name>
+      <pose>0.9 0.0 0.0 0 0 1.570796</pose>
+    </include>
+    <include>
+      <uri>model://cargo_box_marked</uri>   <!-- includes marker 0 (joined to the box) -->
+      <name>box_1</name>
+      <pose>0.9 0.0 0.056 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://mini_pallet</uri>
+      <name>pallet_2</name>
+      <pose>-1.0 -1.6 0.0 0 0 1.570796</pose>
+    </include>
+    <include>
+      <uri>model://mini_pallet</uri>
+      <name>pallet_3</name>
+      <pose>-1.0 1.4 0.0 0 0 1.570796</pose>
+    </include>
+    <include>
+      <uri>model://cargo_box</uri>
+      <name>box_3</name>
+      <pose>-1.0 1.4 0.056 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://shelf</uri>
+      <name>shelf_1</name>
+      <pose>-0.5 2.25 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://shelf</uri>
+      <name>shelf_2</name>
+      <pose>0.5 2.25 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://mini_pallet</uri>
+      <name>shelf_pallet_low</name>
+      <pose>-0.5 2.25 0.066 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://mini_pallet</uri>
+      <name>shelf_pallet_high</name>
+      <pose>0.5 2.25 0.196 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://cargo_box</uri>
+      <name>shelf_box</name>
+      <pose>0.5 2.25 0.252 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://safety_cone</uri>
+      <name>cone_1</name>
+      <pose>1.8 0.75 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://safety_cone</uri>
+      <name>cone_2</name>
+      <pose>1.8 -0.75 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://safety_cone</uri>
+      <name>cone_3</name>
+      <pose>-1.8 0.75 0.0 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://safety_cone</uri>
+      <name>cone_4</name>
+      <pose>-1.8 -0.75 0.0 0 0 0.000000</pose>
+    </include>
+    <!-- ArUco markers (DICT_4X4_50), face = local +x; ids: 0-3 pallets (0 is part of box_1), 4-5 chargers, 6-7 stations -->
+    <include>
+      <uri>model://aruco_marker_1</uri>
+      <name>marker_pallet_2</name>
+      <pose>-1.09 -1.6 0.117 0 0 3.141593</pose>
+    </include>
+    <include>
+      <uri>model://aruco_marker_2</uri>
+      <name>marker_pallet_3</name>
+      <pose>-1.09 1.4 0.117 0 0 3.141593</pose>
+    </include>
+    <include>
+      <uri>model://aruco_marker_3</uri>
+      <name>marker_pallet_pickup</name>
+      <pose>2.61 1.6 0.127 0 0 3.141593</pose>
+    </include>
+    <include>
+      <uri>model://aruco_marker_4</uri>
+      <name>marker_charging_1</name>
+      <pose>-2.938 -1.6 0.24 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://aruco_marker_5</uri>
+      <name>marker_charging_2</name>
+      <pose>-2.938 1.6 0.24 0 0 0.000000</pose>
+    </include>
+    <include>
+      <uri>model://aruco_marker_6</uri>
+      <name>marker_pickup_station</name>
+      <pose>2.875 1.6 0.075 0 0 3.141593</pose>
+    </include>
+    <include>
+      <uri>model://aruco_marker_7</uri>
+      <name>marker_dropoff_station</name>
+      <pose>2.875 -1.6 0.075 0 0 3.141593</pose>
+    </include>
+  </world>
+</sdf>

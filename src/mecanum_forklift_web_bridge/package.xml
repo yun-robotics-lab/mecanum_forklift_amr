@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mecanum_forklift_web_bridge</name>
+  <version>0.0.0</version>
+  <description>Web layer: validated REST API for missions and status, software e-stop, rosbridge and video launch, minimal dashboard. Never publishes velocity or lift commands.</description>
+  <maintainer email="yinchheanyun21@gmail.com">yinchheanyun</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>action_msgs</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+  <exec_depend>mecanum_forklift_interfaces</exec_depend>
+  <exec_depend>mecanum_forklift_task_manager</exec_depend>
+  <exec_depend>mecanum_forklift_docking</exec_depend>
+  <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>web_video_server</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <!-- fastapi and uvicorn: pip packages (the apt versions are too old); see README -->
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

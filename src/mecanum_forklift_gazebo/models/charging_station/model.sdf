@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <model name="charging_station">
+    <static>true</static>
+    <link name="link">
+      <collision name="panel_col">
+        <pose>0 0 0.18 0 0 0</pose>
+        <geometry><box><size>0.04 0.34 0.36</size></box></geometry>
+      </collision>
+      <visual name="panel_vis">
+        <pose>0 0 0.18 0 0 0</pose>
+        <geometry><box><size>0.04 0.34 0.36</size></box></geometry>
+        <material>
+          <ambient>0.25 0.26 0.28 1</ambient>
+          <diffuse>0.25 0.26 0.28 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="trim_vis">
+        <pose>0.021 0 0.35 0 0 0</pose>
+        <geometry><box><size>0.002 0.34 0.02</size></box></geometry>
+        <material>
+          <ambient>0.95 0.8 0.1 1</ambient>
+          <diffuse>0.95 0.8 0.1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="contact_pos_vis">
+        <pose>0.021 0.05 0.08 0 0 0</pose>
+        <geometry><box><size>0.004 0.05 0.03</size></box></geometry>
+        <material>
+          <ambient>0.85 0.7 0.2 1</ambient>
+          <diffuse>0.85 0.7 0.2 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="contact_neg_vis">
+        <pose>0.021 -0.05 0.08 0 0 0</pose>
+        <geometry><box><size>0.004 0.05 0.03</size></box></geometry>
+        <material>
+          <ambient>0.85 0.7 0.2 1</ambient>
+          <diffuse>0.85 0.7 0.2 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="screen_vis">
+        <pose>0.021 0 0.24 0 0 0</pose>
+        <geometry><box><size>0.002 0.16 0.07</size></box></geometry>
+        <material>
+          <ambient>0.05 0.1 0.15 1</ambient>
+          <diffuse>0.05 0.1 0.15 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="status_light_vis">
+        <pose>0.0 0 0.385 0 0 0</pose>
+        <geometry><sphere><radius>0.025</radius></sphere></geometry>
+        <material>
+          <ambient>0.1 0.9 0.2 1</ambient>
+          <diffuse>0.1 0.9 0.2 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0.1 0.9 0.2 1</emissive>
+        </material>
+      </visual>
+      <visual name="pad_vis">
+        <pose>0.28 0 0.002 0 0 0</pose>
+        <geometry><box><size>0.4 0.34 0.004</size></box></geometry>
+        <material>
+          <ambient>0.12 0.45 0.2 1</ambient>
+          <diffuse>0.12 0.45 0.2 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="pad_edge_l_vis">
+        <pose>0.28 0.17 0.003 0 0 0</pose>
+        <geometry><box><size>0.4 0.012 0.006</size></box></geometry>
+        <material>
+          <ambient>0.95 0.8 0.1 1</ambient>
+          <diffuse>0.95 0.8 0.1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="pad_edge_r_vis">
+        <pose>0.28 -0.17 0.003 0 0 0</pose>
+        <geometry><box><size>0.4 0.012 0.006</size></box></geometry>
+        <material>
+          <ambient>0.95 0.8 0.1 1</ambient>
+          <diffuse>0.95 0.8 0.1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
